@@ -122,3 +122,36 @@ def test_correcting_more_than_allowed_selections_reports_an_error():
     with pytest.raises(Exception, match="Cannot select more than 1 choices"):
         question.correct_selected_choices([first.id, second.id])
 
+@pytest.fixture
+def question_with_multiple_choices():
+    """Cria uma questão com alternativas para reutilizar nos testes."""
+    question = Question(
+        title="Qual é a capital do Brasil?",
+        max_selections=2
+    )
+    question.add_choice("Brasília", is_correct=True)
+    question.add_choice("Rio de Janeiro")
+    question.add_choice("São Paulo")
+    question.add_choice("Salvador")
+    return question
+
+
+def test_fixture_question_contains_multiple_choices(question_with_multiple_choices):
+    question = question_with_multiple_choices
+
+    assert len(question.choices) == 4
+    assert [choice.text for choice in question.choices] == [
+        "Brasília", "Rio de Janeiro", "São Paulo", "Salvador"
+    ]
+
+
+def test_fixture_question_corrects_selected_choices(question_with_multiple_choices):
+    question = question_with_multiple_choices
+    correct_choice = question.choices[0]
+    incorrect_choice = question.choices[1]
+
+    result = question.correct_selected_choices(
+        [correct_choice.id, incorrect_choice.id]
+    )
+
+    assert result == [correct_choice.id]
